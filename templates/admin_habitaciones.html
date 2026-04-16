@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Habitaciones - Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-door-closed"></i> Gestión de Habitaciones</h1>
+        <a href="{{ url_for('admin_habitacion_nueva') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nueva Habitación
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            {% if habitaciones %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Número</th>
+                            <th>Tipo</th>
+                            <th>Capacidad</th>
+                            <th>Piso</th>
+                            <th>Precio/Noche</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for habitacion in habitaciones %}
+                        <tr>
+                            <td><strong>{{ habitacion.numero }}</strong></td>
+                            <td>{{ habitacion.tipo.replace('_', ' ').title() }}</td>
+                            <td>{{ habitacion.capacidad }} persona(s)</td>
+                            <td>{{ habitacion.piso }}</td>
+                            <td>${{ habitacion.precio_por_noche }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if habitacion.estado == 'disponible' else 'warning' if habitacion.estado == 'mantenimiento' else 'danger' }}">
+                                    {{ habitacion.estado.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_habitacion_editar', id=habitacion.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('admin_habitacion_eliminar', id=habitacion.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar esta habitación?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                <a href="{{ url_for('habitacion_detalle', id=habitacion.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No hay habitaciones registradas.
+                <a href="{{ url_for('admin_habitacion_nueva') }}" class="alert-link">Crear la primera</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

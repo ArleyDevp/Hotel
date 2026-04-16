@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Panel de Administración</h1>
+    
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Reservas</h6>
+                            <h3 class="mb-0">{{ total_reservas }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-calendar-check text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <a href="{{ url_for('admin_reservas') }}" class="text-primary text-decoration-none small">
+                        Ver todas <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Reservas Activas</h6>
+                            <h3 class="mb-0">{{ reservas_activas }}</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-hourglass-split text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <a href="{{ url_for('admin_reservas', estado='confirmada') }}" class="text-success text-decoration-none small">
+                        Ver activas <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Clientes</h6>
+                            <h3 class="mb-0">{{ total_clientes }}</h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-people text-info fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <a href="{{ url_for('admin_clientes') }}" class="text-info text-decoration-none small">
+                        Gestionar <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Habitaciones</h6>
+                            <h3 class="mb-0">{{ total_habitaciones }}</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-door-closed text-warning fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <a href="{{ url_for('admin_habitaciones') }}" class="text-warning text-decoration-none small">
+                        Gestionar <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Gestión Rápida</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('admin_reserva_nueva') }}" class="btn btn-outline-primary w-100 p-3">
+                                <i class="bi bi-plus-circle fs-4 d-block mb-2"></i>
+                                Nueva Reserva
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('admin_cliente_nueva') }}" class="btn btn-outline-info w-100 p-3">
+                                <i class="bi bi-person-plus fs-4 d-block mb-2"></i>
+                                Nuevo Cliente
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('admin_habitacion_nueva') }}" class="btn btn-outline-warning w-100 p-3">
+                                <i class="bi bi-door-open fs-4 d-block mb-2"></i>
+                                Nueva Habitación
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary w-100 p-3">
+                                <i class="bi bi-globe fs-4 d-block mb-2"></i>
+                                Ver Sitio Web
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Reservas Recientes</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if reservas_recientes %}
+                    <div class="list-group list-group-flush">
+                        {% for reserva in reservas_recientes %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ reserva.cliente.nombre }} {{ reserva.cliente.apellido }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        Hab. {{ reserva.habitacion.numero }} | 
+                                        {{ reserva.fecha_entrada.strftime('%d/%m/%Y') }}
+                                    </small>
+                                </div>
+                                <span class="badge bg-{{ 'success' if reserva.estado == 'confirmada' else 'warning' if reserva.estado == 'pendiente' else 'danger' }}">
+                                    {{ reserva.estado }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center p-3 mb-0">No hay reservas recientes</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('admin_reservas') }}" class="btn btn-sm btn-link w-100">
+                        Ver todas las reservas <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

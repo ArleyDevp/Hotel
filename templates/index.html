@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Hotel Reserva{% endblock %}
+
+{% block content %}
+<div class="hero-section text-white text-center d-flex align-items-center" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/static/images/hero-hotel.jpg') center/cover no-repeat;">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-4 animate__animated animate__fadeInDown">Bienvenido a Hotel Reserva</h1>
+        <p class="lead mb-4 animate__animated animate__fadeInUp">Experiencia única de alojamiento con el mejor servicio</p>
+        <div class="animate__animated animate__fadeInUp">
+            <a href="{{ url_for('habitaciones') }}" class="btn btn-light btn-lg me-2 mb-2">
+                <i class="bi bi-door-open"></i> Ver Habitaciones
+            </a>
+            <a href="{{ url_for('reservar') }}" class="btn btn-outline-light btn-lg mb-2">
+                <i class="bi bi-calendar-check"></i> Reservar Ahora
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row text-center mb-5">
+        <div class="col-md-4">
+            <div class="feature-card p-4 rounded-4 shadow-sm h-100">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-star-fill text-warning fs-1"></i>
+                </div>
+                <h3>Mejor Calidad</h3>
+                <p class="text-muted">Instalaciones de primera clase para tu comodidad</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card p-4 rounded-4 shadow-sm h-100">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-shield-check text-success fs-1"></i>
+                </div>
+                <h3>Seguridad</h3>
+                <p class="text-muted">Tu seguridad es nuestra prioridad</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card p-4 rounded-4 shadow-sm h-100">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-headset text-info fs-1"></i>
+                </div>
+                <h3>24/7 Soporte</h3>
+                <p class="text-muted">Siempre disponibles para ayudarte</p>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="text-center mb-4 display-5 fw-bold">Nuestras Habitaciones</h2>
+    <p class="text-center text-muted mb-5">Encuentra el alojamiento perfecto para tu próxima estadía</p>
+    
+    <div class="row">
+        {% for habitacion in habitaciones %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card room-card h-100 shadow-lg border-0 overflow-hidden">
+                <div class="position-relative">
+                    <img src="{{ habitacion.get_imagen_url() }}" class="card-img-top room-image" alt="Habitación {{ habitacion.numero }}">
+                    <div class="room-badge">
+                        <span class="badge bg-{{ 'success' if habitacion.tipo == 'individual' else 'primary' if habitacion.tipo == 'doble' else 'warning' if habitacion.tipo == 'suite' else 'danger' }}">
+                            {{ habitacion.tipo.replace('_', ' ').title() }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Habitación {{ habitacion.numero }}</h5>
+                    <p class="card-text text-muted">{{ habitacion.descripcion[:80] }}...</p>
+                    <div class="room-features">
+                        <span class="me-3"><i class="bi bi-people text-primary me-1"></i> {{ habitacion.capacidad }}</span>
+                        <span class="me-3"><i class="bi bi-layers text-primary me-1"></i> Piso {{ habitacion.piso }}</span>
+                        <span><i class="bi bi-wifi text-primary me-1"></i> WiFi</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="h3 text-primary mb-0 fw-bold">${{ habitacion.precio_por_noche }}</span>
+                            <small class="text-muted d-block">por noche</small>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('habitacion_detalle', id=habitacion.id) }}" class="btn btn-primary w-100">
+                        <i class="bi bi-info-circle me-2"></i>Ver Detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{{ url_for('habitaciones') }}" class="btn btn-outline-primary btn-lg px-5">
+            Ver Todas las Habitaciones <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+</div>
+
+<section class="bg-light py-5 mt-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="display-6 fw-bold mb-4">¿Por qué elegirnos?</h2>
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-center">
+                        <span class="bg-primary text-white rounded-circle p-2 me-3">
+                            <i class="bi bi-check"></i>
+                        </span>
+                        Ubicación privilegiada en el centro de la ciudad
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <span class="bg-primary text-white rounded-circle p-2 me-3">
+                            <i class="bi bi-check"></i>
+                        </span>
+                        Desayuno buffet gratuito incluido
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <span class="bg-primary text-white rounded-circle p-2 me-3">
+                            <i class="bi bi-check"></i>
+                        </span>
+                        Piscina y spa de clase mundial
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <span class="bg-primary text-white rounded-circle p-2 me-3">
+                            <i class="bi bi-check"></i>
+                        </span>
+                        WiFi de alta velocidad gratuito
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="p-4 bg-white rounded-4 shadow">
+                    <h4 class="fw-bold mb-3">Contacto Directo</h4>
+                    <p class="mb-2"><i class="bi bi-telephone me-2 text-primary"></i> +1 234 567 890</p>
+                    <p class="mb-2"><i class="bi bi-envelope me-2 text-primary"></i> info@hotelreserva.com</p>
+                    <p class="mb-0"><i class="bi bi-geo-alt me-2 text-primary"></i> Av. Principal 1234, Ciudad</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

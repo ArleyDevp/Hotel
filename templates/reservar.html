@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Reservar - Hotel Reserva{% endblock %}
+
+{% block content %}
+<div class="bg-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">Realizar Reserva</h1>
+        <p class="lead">Completa el formulario para reservar tu habitación</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form method="POST" id="reservaForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <h4 class="mb-4"><i class="bi bi-person me-2"></i> Datos Personales</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.nombre.label(class="form-label") }}
+                                {{ form.nombre(class="form-control", id="nombre", placeholder="Tu nombre") }}
+                                <div class="invalid-feedback" id="nombreError"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.apellido.label(class="form-label") }}
+                                {{ form.apellido(class="form-control", id="apellido", placeholder="Tu apellido") }}
+                                <div class="invalid-feedback" id="apellidoError"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control", id="email", type="email", placeholder="tu@email.com") }}
+                                <div class="invalid-feedback" id="emailError"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.telefono.label(class="form-label") }}
+                                {{ form.telefono(class="form-control", id="telefono", placeholder="+1234567890") }}
+                                <div class="invalid-feedback" id="telefonoError"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.documento_identidad.label(class="form-label") }}
+                            {{ form.documento_identidad(class="form-control", id="documento", placeholder="Número de identificación") }}
+                            <div class="invalid-feedback" id="documentoError"></div>
+                            <small class="text-muted">Cédula, pasaporte u otro documento de identidad</small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h4 class="mb-4"><i class="bi bi-calendar-event me-2"></i> Datos de la Reserva</h4>
+                        
+                        <div class="mb-3">
+                            {{ form.num_habitacion.label(class="form-label") }}
+                            {% if request.args.get('habitacion') %}
+                            <p class="form-control-plaintext">
+                                <i class="bi bi-door-closed me-2 text-primary"></i>
+                                <strong>Habitación {{ request.args.get('habitacion') }}</strong>
+                            </p>
+                            {{ form.num_habitacion(class="form-control", id="num_habitacion", value=request.args.get('habitacion'), type="hidden") }}
+                            {% else %}
+                            {{ form.num_habitacion(class="form-select", id="num_habitacion") }}
+                            {% endif %}
+                            <div class="invalid-feedback" id="habitacionError"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.fecha_entrada.label(class="form-label") }}
+                                {{ form.fecha_entrada(class="form-control", id="fecha_entrada", type="date") }}
+                                <div class="invalid-feedback" id="fechaEntradaError"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.fecha_salida.label(class="form-label") }}
+                                {{ form.fecha_salida(class="form-control", id="fecha_salida", type="date") }}
+                                <div class="invalid-feedback" id="fechaSalidaError"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.num_huespedes.label(class="form-label") }}
+                            {{ form.num_huespedes(class="form-control", id="num_huespedes", min="1", max="10") }}
+                            <div class="invalid-feedback" id="huespedesError"></div>
+                        </div>
+
+                        <div id="resumenReserva" class="alert alert-info d-none">
+                            <h5><i class="bi bi-receipt me-2"></i>Resumen de Reserva</h5>
+                            <div id="resumenContent"></div>
+                        </div>
+
+                        <div id="disponibilidadAlert" class="alert alert-warning d-none">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span id="disponibilidadMensaje"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="btnReservar">
+                                <i class="bi bi-check-circle me-2"></i>Confirmar Reserva
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reservaForm');
+    const numHabitacion = document.getElementById('num_habitacion');
+    const fechaEntrada = document.getElementById('fecha_entrada');
+    const fechaSalida = document.getElementById('fecha_salida');
+    const numHuespedes = document.getElementById('num_huespedes');
+    const resumenDiv = document.getElementById('resumenReserva');
+    const resumenContent = document.getElementById('resumenContent');
+    const disponibilidadAlert = document.getElementById('disponibilidadAlert');
+    const disponibilidadMensaje = document.getElementById('disponibilidadMensaje');
+    const btnReservar = document.getElementById('btnReservar');
+
+    const today = new Date().toISOString().split('T')[0];
+    fechaEntrada.min = today;
+    fechaSalida.min = today;
+
+    fechaEntrada.addEventListener('change', function() {
+        const salidaDate = new Date(this.value);
+        salidaDate.setDate(salidaDate.getDate() + 1);
+        fechaSalida.min = salidaDate.toISOString().split('T')[0];
+        
+        if (fechaSalida.value && fechaSalida.value <= this.value) {
+            fechaSalida.value = fechaSalida.min;
+        }
+        
+        verificarDisponibilidad();
+    });
+
+    fechaSalida.addEventListener('change', verificarDisponibilidad);
+    numHabitacion.addEventListener('change', verificarDisponibilidad);
+
+    async function verificarDisponibilidad() {
+        if (!numHabitacion.value || !fechaEntrada.value || !fechaSalida.value) {
+            resumenDiv.classList.add('d-none');
+            disponibilidadAlert.classList.add('d-none');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/disponibilidad/${numHabitacion.value}?fecha_entrada=${fechaEntrada.value}&fecha_salida=${fechaSalida.value}`);
+            const data = await response.json();
+
+            if (data.disponible === false) {
+                disponibilidadAlert.classList.remove('d-none');
+                disponibilidadMensaje.textContent = `La habitación está ocupada del ${data.reserva_conflicto.fecha_entrada} al ${data.reserva_conflicto.fecha_salida} por ${data.reserva_conflicto.cliente}`;
+                btnReservar.disabled = true;
+            } else {
+                disponibilidadAlert.classList.add('d-none');
+                btnReservar.disabled = false;
+                
+                if (numHabitacion.value && fechaEntrada.value && fechaSalida.value) {
+                    calcularTotal();
+                }
+            }
+        } catch (error) {
+            console.error('Error verificando disponibilidad:', error);
+        }
+    }
+
+    function calcularTotal() {
+        const noches = Math.ceil((new Date(fechaSalida.value) - new Date(fechaEntrada.value)) / (1000 * 60 * 60 * 24));
+        const precio = 80;
+        
+        if (noches > 0 && precio > 0) {
+            const total = noches * precio;
+            resumenContent.innerHTML = `
+                <p><strong>Habitación:</strong> ${numHabitacion.options[numHabitacion.selectedIndex].text}</p>
+                <p><strong>Entrada:</strong> ${fechaEntrada.value}</p>
+                <p><strong>Salida:</strong> ${fechaSalida.value}</p>
+                <p><strong>Noches:</strong> ${noches}</p>
+                <p class="h4 text-primary"><strong>Total:</strong> $${total.toFixed(2)}</p>
+            `;
+            resumenDiv.classList.remove('d-none');
+        }
+    }
+
+    function validarCampo(campo, errorId, validacion) {
+        const error = document.getElementById(errorId);
+        if (!validacion.valido) {
+            campo.classList.add('is-invalid');
+            campo.classList.remove('is-valid');
+            error.textContent = validacion.mensaje;
+        } else {
+            campo.classList.remove('is-invalid');
+            campo.classList.add('is-valid');
+        }
+    }
+
+    form.addEventListener('submit', function(e) {
+        let hayErrores = false;
+
+        const nombre = document.getElementById('nombre');
+        const nombreValido = nombre.value.trim().length >= 2;
+        validarCampo(nombre, 'nombreError', {
+            valido: nombreValido,
+            mensaje: 'El nombre debe tener al menos 2 caracteres'
+        });
+        if (!nombreValido) hayErrores = true;
+
+        const apellido = document.getElementById('apellido');
+        const apellidoValido = apellido.value.trim().length >= 2;
+        validarCampo(apellido, 'apellidoError', {
+            valido: apellidoValido,
+            mensaje: 'El apellido debe tener al menos 2 caracteres'
+        });
+        if (!apellidoValido) hayErrores = true;
+
+        const email = document.getElementById('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailValido = emailRegex.test(email.value.trim());
+        validarCampo(email, 'emailError', {
+            valido: emailValido,
+            mensaje: 'Ingresa un email válido'
+        });
+        if (!emailValido) hayErrores = true;
+
+        const telefono = document.getElementById('telefono');
+        const telefonoValido = telefono.value.trim().length >= 7;
+        validarCampo(telefono, 'telefonoError', {
+            valido: telefonoValido,
+            mensaje: 'El teléfono debe tener al menos 7 dígitos'
+        });
+        if (!telefonoValido) hayErrores = true;
+
+        const documento = document.getElementById('documento');
+        const documentoValido = documento.value.trim().length >= 5 && documento.value.trim().length <= 20;
+        validarCampo(documento, 'documentoError', {
+            valido: documentoValido,
+            mensaje: 'El documento debe tener entre 5 y 20 caracteres'
+        });
+        if (!documentoValido) hayErrores = true;
+
+        if (!numHabitacion.value) {
+            numHabitacion.classList.add('is-invalid');
+            hayErrores = true;
+        } else {
+            numHabitacion.classList.remove('is-invalid');
+        }
+
+        const fechaEntradaVal = new Date(fechaEntrada.value);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        if (fechaEntradaVal < hoy) {
+            fechaEntrada.classList.add('is-invalid');
+            document.getElementById('fechaEntradaError').textContent = 'La fecha no puede ser en el pasado';
+            hayErrores = true;
+        } else {
+            fechaEntrada.classList.remove('is-invalid');
+        }
+
+        if (fechaSalida.value && new Date(fechaSalida.value) <= new Date(fechaEntrada.value)) {
+            fechaSalida.classList.add('is-invalid');
+            document.getElementById('fechaSalidaError').textContent = 'La fecha de salida debe ser posterior';
+            hayErrores = true;
+        } else {
+            fechaSalida.classList.remove('is-invalid');
+        }
+
+        const noches = Math.ceil((new Date(fechaSalida.value) - new Date(fechaEntrada.value)) / (1000 * 60 * 60 * 24));
+        if (noches > 30) {
+            alert('La estancia no puede exceder 30 noches');
+            hayErrores = true;
+        }
+
+        const huespedes = parseInt(numHuespedes.value);
+        if (huespedes < 1 || huespedes > 10) {
+            numHuespedes.classList.add('is-invalid');
+            document.getElementById('huespedesError').textContent = 'Debe ser entre 1 y 10';
+            hayErrores = true;
+        } else {
+            numHuespedes.classList.remove('is-invalid');
+        }
+
+        if (hayErrores) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

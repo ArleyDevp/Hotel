@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_reservas') }}">Reservas</a></li>
+            <li class="breadcrumb-item active">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="bi bi-calendar-plus me-2"></i>{{ titulo }}</h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" id="reservaForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.cliente_id.label(class="form-label") }}
+                                {{ form.cliente_id(class="form-select") }}
+                                {% for error in form.cliente_id.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.habitacion_id.label(class="form-label") }}
+                                {{ form.habitacion_id(class="form-select") }}
+                                {% for error in form.habitacion_id.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                                {% if habitaciones_info %}
+                                <small class="text-muted" id="habitacionInfo"></small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.fecha_entrada.label(class="form-label") }}
+                                {{ form.fecha_entrada(class="form-control", type="date", id="fecha_entrada") }}
+                                {% for error in form.fecha_entrada.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.fecha_salida.label(class="form-label") }}
+                                {{ form.fecha_salida(class="form-control", type="date", id="fecha_salida") }}
+                                {% for error in form.fecha_salida.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.num_huespedes.label(class="form-label") }}
+                                {{ form.num_huespedes(class="form-control", id="num_huespedes", min="1", max="10") }}
+                                {% for error in form.num_huespedes.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.metodo_pago.label(class="form-label") }}
+                                {{ form.metodo_pago(class="form-select") }}
+                                {% for error in form.metodo_pago.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.notas.label(class="form-label") }}
+                            {{ form.notas(class="form-control", rows="3", placeholder="Observaciones o notas especiales") }}
+                            {% for error in form.notas.errors %}
+                            <span class="text-danger small">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div id="validacionAlert" class="alert alert-danger d-none">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span id="validacionMensaje"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('admin_reservas') }}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary" id="btnGuardar">
+                                <i class="bi bi-check-circle me-2"></i>Guardar Reserva
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if habitaciones_info %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Estado de Habitaciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Habitación</th>
+                                    <th>Tipo</th>
+                                    <th>Precio</th>
+                                    <th>Capacidad</th>
+                                    <th>Estado</th>
+                                    <th>Próxima Disponibilidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for h in habitaciones_info %}
+                                <tr class="{{ 'table-success' if h.disponible else 'table-danger' }}">
+                                    <td><strong>{{ h.numero }}</strong></td>
+                                    <td>{{ h.tipo.replace('_', ' ').title() }}</td>
+                                    <td>${{ h.precio }}</td>
+                                    <td>{{ h.capacidad }} pers.</td>
+                                    <td>
+                                        {% if h.disponible %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disponible</span>
+                                        {% else %}
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ocupada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if h.proxima_fecha %}
+                                        <small class="text-muted">Libre desde: {{ h.proxima_fecha }}</small>
+                                        {% else %}
+                                        <small class="text-success">Habitación libre</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if habitaciones_info %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const habitacionSelect = document.getElementById('habitacion_id');
+    const fechaEntrada = document.getElementById('fecha_entrada');
+    const fechaSalida = document.getElementById('fecha_salida');
+    const numHuespedes = document.getElementById('num_huespedes');
+    const btnGuardar = document.getElementById('btnGuardar');
+    const validacionAlert = document.getElementById('validacionAlert');
+    const validacionMensaje = document.getElementById('validacionMensaje');
+    const habitacionInfo = document.getElementById('habitacionInfo');
+
+    const habitacionesData = {{ habitaciones_info | tojson }};
+
+    const today = new Date().toISOString().split('T')[0];
+    fechaEntrada.min = today;
+    fechaSalida.min = today;
+
+    function actualizarInfoHabitacion() {
+        const selectedId = parseInt(habitacionSelect.value);
+        const habitacion = habitacionesData.find(h => h.id === selectedId);
+        
+        if (habitacion) {
+            if (habitacion.disponible) {
+                habitacionInfo.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Disponible</span>';
+                numHuespedes.max = habitacion.capacidad;
+                numHuespedes.placeholder = `Máx: ${habitacion.capacidad} personas`;
+            } else {
+                habitacionInfo.innerHTML = `<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Ocupada hasta: ${habitacion.proxima_fecha || 'Verificar'}</span>`;
+            }
+        }
+    }
+
+    habitacionSelect.addEventListener('change', actualizarInfoHabitacion);
+
+    fechaEntrada.addEventListener('change', function() {
+        const salidaDate = new Date(this.value);
+        salidaDate.setDate(salidaDate.getDate() + 1);
+        fechaSalida.min = salidaDate.toISOString().split('T')[0];
+        
+        if (fechaSalida.value && fechaSalida.value <= this.value) {
+            fechaSalida.value = fechaSalida.min;
+        }
+    });
+
+    document.getElementById('reservaForm').addEventListener('submit', function(e) {
+        const selectedId = parseInt(habitacionSelect.value);
+        const habitacion = habitacionesData.find(h => h.id === selectedId);
+
+        if (!habitacion) {
+            e.preventDefault();
+            validacionAlert.classList.remove('d-none');
+            validacionMensaje.textContent = 'Debe seleccionar una habitación';
+            return;
+        }
+
+        if (!habitacion.disponible) {
+            e.preventDefault();
+            validacionAlert.classList.remove('d-none');
+            validacionMensaje.textContent = `La habitación está ocupada. Estará disponible a partir del ${habitacion.proxima_fecha || 'fecha por confirmar'}`;
+            return;
+        }
+
+        const fechaEnt = new Date(fechaEntrada.value);
+        const fechaSal = new Date(fechaSalida.value);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        if (fechaEnt < hoy) {
+            e.preventDefault();
+            validacionAlert.classList.remove('d-none');
+            validacionMensaje.textContent = 'La fecha de entrada no puede ser en el pasado';
+            return;
+        }
+
+        if (fechaSal <= fechaEnt) {
+            e.preventDefault();
+            validacionAlert.classList.remove('d-none');
+            validacionMensaje.textContent = 'La fecha de salida debe ser posterior a la fecha de entrada';
+            return;
+        }
+
+        const noches = Math.ceil((fechaSal - fechaEnt) / (1000 * 60 * 60 * 24));
+        if (noches > 60) {
+            e.preventDefault();
+            validacionAlert.classList.remove('d-none');
+            validacionMensaje.textContent = 'La estancia no puede exceder 60 noches';
+            return;
+        }
+
+        const huespedes = parseInt(numHuespedes.value);
+        if (huespedes > habitacion.capacidad) {
+            e.preventDefault();
+            validacionAlert.classList.remove('d-none');
+            validacionMensaje.textContent = `La capacidad máxima de la habitación es ${habitacion.capacidad} personas`;
+            return;
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

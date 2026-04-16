@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_habitaciones') }}">Habitaciones</a></li>
+            <li class="breadcrumb-item active">{{ titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="bi bi-door-open"></i> {{ titulo }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.numero.label(class="form-label") }}
+                                {{ form.numero(class="form-control") }}
+                                {% for error in form.numero.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.tipo.label(class="form-label") }}
+                                {{ form.tipo(class="form-control") }}
+                                {% for error in form.tipo.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.descripcion.label(class="form-label") }}
+                            {{ form.descripcion(class="form-control", rows="3") }}
+                            {% for error in form.descripcion.errors %}
+                            <span class="text-danger small">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ form.precio_por_noche.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.precio_por_noche(class="form-control") }}
+                                </div>
+                                {% for error in form.precio_por_noche.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.capacidad.label(class="form-label") }}
+                                {{ form.capacidad(class="form-control") }}
+                                {% for error in form.capacidad.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.piso.label(class="form-label") }}
+                                {{ form.piso(class="form-control") }}
+                                {% for error in form.piso.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.estado.label(class="form-label") }}
+                                {{ form.estado(class="form-control") }}
+                                {% for error in form.estado.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.imagen_url.label(class="form-label") }}
+                                {{ form.imagen_url(class="form-control", placeholder="https://...") }}
+                                {% for error in form.imagen_url.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('admin_habitaciones') }}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

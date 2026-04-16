@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Habitaciones - Hotel Reserva{% endblock %}
+
+{% block content %}
+<div class="bg-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">Nuestras Habitaciones</h1>
+        <p class="lead">Encuentra la habitación perfecta para tu estancia</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-4">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <a href="{{ url_for('habitaciones') }}" class="btn btn-{{ 'primary' if not request.args.get('tipo') else 'outline-primary' }} rounded-pill px-4">
+                            <i class="bi bi-grid me-2"></i>Todos
+                        </a>
+                        <a href="{{ url_for('habitaciones', tipo='individual') }}" class="btn btn-{{ 'success' if request.args.get('tipo') == 'individual' else 'outline-success' }} rounded-pill px-4">
+                            Individual
+                        </a>
+                        <a href="{{ url_for('habitaciones', tipo='doble') }}" class="btn btn-{{ 'primary' if request.args.get('tipo') == 'doble' else 'outline-primary' }} rounded-pill px-4">
+                            Doble
+                        </a>
+                        <a href="{{ url_for('habitaciones', tipo='suite') }}" class="btn btn-{{ 'warning' if request.args.get('tipo') == 'suite' else 'outline-warning' }} rounded-pill px-4">
+                            Suite
+                        </a>
+                        <a href="{{ url_for('habitaciones', tipo='suite_lujo') }}" class="btn btn-{{ 'danger' if request.args.get('tipo') == 'suite_lujo' else 'outline-danger' }} rounded-pill px-4">
+                            Suite de Lujo
+                        </a>
+                        <a href="{{ url_for('habitaciones', tipo='familiar') }}" class="btn btn-{{ 'info' if request.args.get('tipo') == 'familiar' else 'outline-info' }} rounded-pill px-4">
+                            Familiar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if habitaciones %}
+    <div class="row">
+        {% for habitacion in habitaciones %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card room-card h-100 shadow-lg border-0 overflow-hidden">
+                <div class="position-relative">
+                    <img src="{{ habitacion.get_imagen_url() }}" class="card-img-top room-image" alt="Habitación {{ habitacion.numero }}">
+                    <div class="room-badge">
+                        <span class="badge bg-{{ 'success' if habitacion.tipo == 'individual' else 'primary' if habitacion.tipo == 'doble' else 'warning' if habitacion.tipo == 'suite' else 'danger' }}">
+                            {{ habitacion.tipo.replace('_', ' ').title() }}
+                        </span>
+                    </div>
+                    {% if habitacion.estado == 'disponible' %}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disponible</span>
+                    </div>
+                    {% else %}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ocupada</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold mb-0">Habitación {{ habitacion.numero }}</h5>
+                    </div>
+                    <p class="text-muted small mb-2"><i class="bi bi-layers me-1"></i> Piso {{ habitacion.piso }}</p>
+                    <p class="card-text">{{ habitacion.descripcion }}</p>
+                    <div class="room-features bg-light rounded-3 p-3 my-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <i class="bi bi-people text-primary fs-5"></i>
+                                <div class="small fw-bold">{{ habitacion.capacidad }}</div>
+                            </div>
+                            <div class="col-4">
+                                <i class="bi bi-wifi text-primary fs-5"></i>
+                                <div class="small fw-bold">WiFi</div>
+                            </div>
+                            <div class="col-4">
+                                <i class="bi bi-snow text-primary fs-5"></i>
+                                <div class="small fw-bold">A/C</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="h3 text-primary mb-0 fw-bold">${{ habitacion.precio_por_noche }}</span>
+                            <small class="text-muted d-block">por noche</small>
+                        </div>
+                    </div>
+                    {% if habitacion.estado == 'disponible' %}
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('habitacion_detalle', id=habitacion.id) }}" class="btn btn-primary">
+                            <i class="bi bi-info-circle me-2"></i>Ver Detalles
+                        </a>
+                        <a href="{{ url_for('reservar') }}?habitacion={{ habitacion.numero }}" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-plus me-2"></i>Reservar
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning py-2 mb-2">
+                        <small><i class="bi bi-exclamation-triangle me-1"></i>Consultar disponibilidad</small>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('habitacion_detalle', id=habitacion.id) }}" class="btn btn-secondary">
+                            <i class="bi bi-info-circle me-2"></i>Ver Detalles
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="bi bi-search fs-1 d-block mb-3"></i>
+        <h4>No hay habitaciones disponibles</h4>
+        <p class="text-muted">Prueba con otro tipo de habitación o comunícate con nosotros.</p>
+        <a href="{{ url_for('reservar') }}" class="btn btn-primary mt-2">
+            <i class="bi bi-telephone me-2"></i>Consultar Disponibilidad
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

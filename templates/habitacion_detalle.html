@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Habitación {{ habitacion.numero }} - Hotel Reserva{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none"><i class="bi bi-house me-1"></i>Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('habitaciones') }}" class="text-decoration-none">Habitaciones</a></li>
+            <li class="breadcrumb-item active">Habitación {{ habitacion.numero }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 overflow-hidden">
+                <div class="position-relative">
+                    <img src="{{ habitacion.get_imagen_url() }}" class="card-img-top" style="height: 400px; object-fit: cover;" alt="Habitación {{ habitacion.numero }}">
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <h2 class="text-white mb-1">Habitación {{ habitacion.numero }}</h2>
+                                <span class="badge bg-{{ 'success' if habitacion.tipo == 'individual' else 'primary' if habitacion.tipo == 'doble' else 'warning' if habitacion.tipo == 'suite' else 'danger' }} fs-6">
+                                    {{ habitacion.tipo.replace('_', ' ').title() }}
+                                </span>
+                            </div>
+                            <div class="text-white text-end">
+                                <span class="badge bg-{{ 'success' if habitacion.estado == 'disponible' else 'danger' if habitacion.estado == 'ocupada' else 'warning' }} mb-2">
+                                    <i class="bi bi-circle-fill me-1"></i>{{ habitacion.estado.title() }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <i class="bi bi-layers text-primary fs-3"></i>
+                                <div class="fw-bold">Piso {{ habitacion.piso }}</div>
+                                <small class="text-muted">Ubicación</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <i class="bi bi-people text-primary fs-3"></i>
+                                <div class="fw-bold">{{ habitacion.capacidad }} Personas</div>
+                                <small class="text-muted">Capacidad</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 text-center">
+                                <i class="bi bi-rulers text-primary fs-3"></i>
+                                <div class="fw-bold">32 m²</div>
+                                <small class="text-muted">Tamaño</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="fw-bold mb-3"><i class="bi bi-info-circle me-2 text-primary"></i>Descripción</h4>
+                    <p class="lead">{{ habitacion.descripcion }}</p>
+
+                    {% if reservas_proximas %}
+                    <div class="alert alert-warning mt-4">
+                        <h5><i class="bi bi-calendar-x me-2"></i>Reservas Próximas</h5>
+                        <p class="mb-2">Esta habitación tiene las siguientes reservas:</p>
+                        <ul class="mb-0">
+                            {% for reserva in reservas_proximas %}
+                            <li>
+                                <strong>{{ reserva.fecha_entrada.strftime('%d/%m/%Y') }}</strong> - 
+                                <strong>{{ reserva.fecha_salida.strftime('%d/%m/%Y') }}</strong>
+                                ({{ reserva.cliente.nombre }} {{ reserva.cliente.apellido }})
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <h4 class="fw-bold mt-5 mb-3"><i class="bi bi-stars me-2 text-primary"></i>Servicios Incluidos</h4>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-2">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-wifi text-success"></i>
+                                </div>
+                                <span>WiFi gratuito</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-2">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-snow text-success"></i>
+                                </div>
+                                <span>Aire acondicionado</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-2">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-tv text-success"></i>
+                                </div>
+                                <span>TV por cable</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-2">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-cup-hot text-success"></i>
+                                </div>
+                                <span>Desayuno incluido</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-2">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-water text-success"></i>
+                                </div>
+                                <span>Agua caliente 24h</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-2">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="bi bi-shield-lock text-success"></i>
+                                </div>
+                                <span>Caja fuerte</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-lg border-0 sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white text-center py-4 border-0">
+                    <h4 class="mb-0">Reservar Ahora</h4>
+                </div>
+                <div class="card-body text-center p-4">
+                    <p class="text-muted mb-1">Precio por noche</p>
+                    <h2 class="text-primary mb-0 fw-bold">${{ habitacion.precio_por_noche }}</h2>
+                    <p class="small text-muted mb-4">Impuestos incluidos</p>
+                    
+                    {% if habitacion.estado == 'disponible' %}
+                    <a href="{{ url_for('reservar') }}?habitacion={{ habitacion.numero }}" class="btn btn-primary btn-lg w-100 mb-3">
+                        <i class="bi bi-calendar-check me-2"></i>Reservar Ahora
+                    </a>
+                    {% else %}
+                    <div class="alert alert-warning mb-3">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Habitación Ocupada</strong>
+                        <hr class="my-2">
+                        {% if reservas_proximas %}
+                        <small>Disponible a partir del {{ reservas_proximas[0].fecha_salida.strftime('%d/%m/%Y') }}</small>
+                        {% else %}
+                        <small>Consultar disponibilidad</small>
+                        {% endif %}
+                    </div>
+                    <a href="{{ url_for('reservar') }}?habitacion={{ habitacion.numero }}" class="btn btn-secondary btn-lg w-100 mb-3" disabled>
+                        <i class="bi bi-x-circle me-2"></i>No Disponible
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('habitaciones') }}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-left me-2"></i>Ver Otras
+                    </a>
+                </div>
+                <div class="card-footer bg-white border-0 p-4">
+                    <div class="d-flex align-items-center text-success mb-2">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <small>Cancelación gratuita hasta 48h antes</small>
+                    </div>
+                    <div class="d-flex align-items-center text-info">
+                        <i class="bi bi-shield-check me-2"></i>
+                        <small>Reserva 100% segura</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
